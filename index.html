@@ -10,8 +10,7 @@
 body {
     margin:0;
     font-family: Arial;
-
-    background-image: url("https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=1600&q=80");
+    background-image: url("https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=1600&q=80");
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -23,26 +22,6 @@ body::before {
     position:fixed;
     inset:0;
     background: rgba(0,0,0,0.55);
-    z-index:0;
-}
-
-body::after {
-    content:"";
-    position:fixed;
-    inset:0;
-    background: linear-gradient(
-        180deg,
-        rgba(0,0,0,0.2),
-        rgba(0,0,0,0.6),
-        rgba(0,0,0,0.85)
-    );
-    z-index:0;
-}
-
-.overlay {
-    position:relative;
-    z-index:1;
-    padding:20px 0;
 }
 
 .wrapper {
@@ -50,24 +29,17 @@ body::after {
     margin:20px auto;
     display:flex;
     gap:15px;
-    align-items:flex-start;
+    flex-wrap:wrap;
+    padding:15px;
 }
 
-.container {
-    flex:2;
-    background: rgba(255,255,255,0.10);
-    backdrop-filter: blur(14px);
-    padding:20px;
-    border-radius:16px;
-    border:1px solid rgba(255,255,255,0.15);
-}
-
-.sidebar {
+.container, .sidebar {
     flex:1;
-    background: rgba(0,0,0,0.35);
+    min-width:300px;
+    background: rgba(255,255,255,0.10);
     backdrop-filter: blur(12px);
-    padding:18px;
     border-radius:16px;
+    padding:20px;
     border:1px solid rgba(255,255,255,0.15);
 }
 
@@ -78,28 +50,26 @@ h1 {
 
 label {
     display:block;
-    margin-top:14px;
+    margin-top:12px;
     font-weight:bold;
 }
 
 input[type=range] {
-    width:85%;
+    width:100%;
     accent-color:#00e676;
-    display:block;
-    margin-top:8px;
 }
 
 select {
     width:100%;
-    padding:12px;
-    margin-top:6px;
+    padding:10px;
     border-radius:10px;
+    margin-top:5px;
 }
 
 .result {
-    margin-top:20px;
-    background: rgba(0,0,0,0.25);
+    margin-top:15px;
     padding:15px;
+    background: rgba(0,0,0,0.3);
     border-radius:12px;
     text-align:center;
 }
@@ -107,28 +77,51 @@ select {
 .counter {
     font-size:20px;
     font-weight:bold;
-    margin:10px 0;
-}
-
-.small {
-    font-size:13px;
-    opacity:0.85;
-    margin-top:6px;
+    margin:6px 0;
 }
 
 button {
     width:100%;
     margin-top:15px;
+    padding:14px;
+    border:none;
+    border-radius:10px;
     background:#00c853;
     color:white;
-    border:none;
-    padding:14px;
-    border-radius:10px;
     font-weight:bold;
+    cursor:pointer;
 }
 
-@media(max-width:850px){
-    .wrapper{flex-direction:column;}
+.small {
+    font-size:13px;
+    opacity:0.85;
+}
+
+/* цель */
+.goalBox {
+    margin-top:10px;
+    padding:12px;
+    border-radius:12px;
+    background: rgba(0,0,0,0.35);
+    display:none;
+}
+
+.goalTitle {
+    font-size:26px;
+    font-weight:bold;
+    margin-bottom:8px;
+}
+
+.goalBtn {
+    width:100%;
+    margin-top:15px;
+    padding:12px;
+    border-radius:10px;
+    border:none;
+    background:rgba(255,255,255,0.15);
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
 }
 
 </style>
@@ -136,24 +129,20 @@ button {
 
 <body>
 
-<div class="overlay">
-
 <div class="wrapper">
 
 <!-- КАЛЬКУЛЯТОР -->
 <div class="container">
 
-<h1>💰 Твой возможный доход курьера</h1>
+<h1>💰 Твой возможный доход курьером в Яндекс.Еде</h1>
 
-<label>Сколько часов в день?</label>
+<label>Сколько часов в день ты хочешь работать?</label>
 <input id="hours" type="range" min="1" max="12" value="7">
-<div>Часов: <span id="hoursOut">7</span></div>
 
-<label>Сколько дней в неделю?</label>
+<label>Сколько дней в неделю планируешь работать?</label>
 <input id="days" type="range" min="1" max="7" value="3">
-<div>Дней: <span id="daysOut">3</span></div>
 
-<label>Как будешь доставлять?</label>
+<label>На чём будешь доставлять заказы?</label>
 <select id="type">
 <option value="auto">🚗 Авто</option>
 <option value="bike">🚴 Вело</option>
@@ -171,33 +160,34 @@ button {
 <div>За месяц</div>
 <div class="counter" id="month">0 ₽</div>
 
-<div class="small" id="bonusText"></div>
-
 <button onclick="go()">🚀 Начать сейчас</button>
 
 </div>
 
 </div>
 
-<!-- БОНУС -->
+<!-- БОНУС + ЦЕЛЬ -->
 <div class="sidebar">
 
-<h2 style="font-size:16px;">🎁 Приведи друга</h2>
+<h2>🎁 Приведи друга</h2>
 
-<p style="font-size:13px; opacity:0.9;">
-+20 000 ₽ за каждого приглашённого друга
-</p>
+<p class="small">+20 000 ₽ за каждого приглашённого друга</p>
 
 <label>
-<input type="checkbox" id="refBonus">
-Хочу участвовать в бонусной программе
+<input type="checkbox" id="bonus"> Участвую в бонусе
 </label>
 
 <label>Сколько друзей пригласишь?</label>
 <input id="friends" type="range" min="0" max="10" value="0">
-<div>Друзей: <span id="friendsOut">0</span></div>
+<div id="friendsOut">0</div>
 
-</div>
+<!-- КНОПКА ЦЕЛИ -->
+<button class="goalBtn" onclick="toggleGoal()">
+🎯 На что хватит этих денег?
+</button>
+
+<!-- РАСКРЫВАЮЩИЙСЯ БЛОК -->
+<div id="goalBox" class="goalBox"></div>
 
 </div>
 
@@ -208,91 +198,103 @@ button {
 const link =
 "https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=2ec40a49329f4a75ba7687a9e5ff3c0d&utm_content=blank";
 
-/* ставки */
 const rates = {
-    ped:  [330, 340],
-    bike: [410, 420],
-    auto: [510, 520]
+    ped:[330,340],
+    bike:[410,420],
+    auto:[510,520]
 };
 
-let userRate = null;
-
-function rand(min, max){
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+function rand(min,max){
+    return Math.floor(Math.random()*(max-min+1))+min;
 }
 
-function initRates(){
-    userRate = {
-        ped: rand(rates.ped[0], rates.ped[1]),
-        bike: rand(rates.bike[0], rates.bike[1]),
-        auto: rand(rates.auto[0], rates.auto[1])
-    };
-}
+let userRate = {
+    ped: rand(...rates.ped),
+    bike: rand(...rates.bike),
+    auto: rand(...rates.auto)
+};
 
-/* UI */
+const goals = [
+{ name:"🎧 Наушники", price:5000 },
+{ name:"👕 Одежда", price:8000 },
+{ name:"📱 Смартфон", price:25000 },
+{ name:"🚲 Велосипед", price:35000 },
+{ name:"💻 Ноутбук", price:70000 },
+{ name:"🌊 В Питер на выходные", price:30000 },
+{ name:"🏖️ Отпуск", price:80000 }
+];
+
 const h = document.getElementById("hours");
 const d = document.getElementById("days");
 const t = document.getElementById("type");
-const f = document.getElementById("friends");
-const b = document.getElementById("refBonus");
 
-h.oninput = () => { document.getElementById("hoursOut").innerText = h.value; calc(); };
-d.oninput = () => { document.getElementById("daysOut").innerText = d.value; calc(); };
-f.oninput = () => { document.getElementById("friendsOut").innerText = f.value; calc(); };
-t.onchange = calc;
-b.onchange = calc;
-
-function animate(el, val){
-    let cur = 0;
-    clearInterval(el.i);
-
-    el.i = setInterval(()=>{
-        cur += val/25;
-
-        if(cur >= val){
-            cur = val;
-            clearInterval(el.i);
-        }
-
-        el.innerText = Math.round(cur).toLocaleString("ru-RU") + " ₽";
-    },15);
-}
+h.oninput = d.oninput = t.onchange = calc;
 
 function calc(){
 
-    if(!userRate){
-        initRates();
-    }
+let hours = +h.value;
+let days = +d.value;
+let type = t.value;
 
-    let hours = +h.value;
-    let days = +d.value;
-    let type = t.value;
+let hourly = userRate[type];
 
-    let hourly = userRate[type];
+let day = hourly * hours;
+let week = day * days;
+let month = week * 4.3;
 
-    let day = hourly * hours;
-    let week = day * days;
-    let month = week * 4.3;
+document.getElementById("day").innerText =
+Math.round(day).toLocaleString()+" ₽";
 
-    let bonus = 0;
+document.getElementById("week").innerText =
+Math.round(week).toLocaleString()+" ₽";
 
-    if(b.checked){
-        bonus = (+f.value) * 20000;
+document.getElementById("month").innerText =
+Math.round(month).toLocaleString()+" ₽";
 
-        document.getElementById("bonusText").innerText =
-            "🎁 Бонус за приглашённых друзей: " +
-            bonus.toLocaleString("ru-RU") + " ₽";
-    } else {
-        document.getElementById("bonusText").innerText = "";
-    }
+window.currentMonth = month;
 
-    animate(document.getElementById("day"), day);
-    animate(document.getElementById("week"), week);
-    animate(document.getElementById("month"), month);
+}
+
+function toggleGoal(){
+
+let box = document.getElementById("goalBox");
+
+if(box.style.display === "block"){
+box.style.display = "none";
+return;
+}
+
+box.style.display = "block";
+
+renderGoal(window.currentMonth || 0);
+}
+
+function renderGoal(month){
+
+let filtered = goals.filter(g => g.price <= month * 3);
+
+if(filtered.length === 0){
+document.getElementById("goalBox").innerHTML = "";
+return;
+}
+
+let goal = filtered[Math.floor(Math.random() * filtered.length)];
+
+let save = month / 3;
+let time = goal.price / save;
+
+document.getElementById("goalBox").innerHTML =
+
+`<div class="goalTitle">🎯 ${goal.name}</div>
+<div class="small">
+Стоимость: ${goal.price.toLocaleString()} ₽<br><br>
+Если откладывать 1/3 дохода:<br>
+≈ ${time.toFixed(1)} мес. до цели
+</div>`;
 }
 
 function go(){
-    window.open(link, "_blank");
+window.open(link,"_blank");
 }
 
 calc();
