@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Калькулятор дохода курьера</title>
+
+<style>
+
+body {
+    margin:0;
+    font-family: Arial;
+
+    background-image: url("https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=1600&q=80");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color:white;
+}
+
+body::before {
+    content:"";
+    position:fixed;
+    inset:0;
+    background: rgba(0,0,0,0.55);
+    z-index:0;
+}
+
+body::after {
+    content:"";
+    position:fixed;
+    inset:0;
+    background: linear-gradient(
+        180deg,
+        rgba(0,0,0,0.2),
+        rgba(0,0,0,0.6),
+        rgba(0,0,0,0.85)
+    );
+    z-index:0;
+}
+
+.overlay {
+    position:relative;
+    z-index:1;
+    padding:20px 0;
+}
+
+.wrapper {
+    max-width:900px;
+    margin:20px auto;
+    display:flex;
+    gap:15px;
+    align-items:flex-start;
+}
+
+.container {
+    flex:2;
+    background: rgba(255,255,255,0.10);
+    backdrop-filter: blur(14px);
+    padding:20px;
+    border-radius:16px;
+    border:1px solid rgba(255,255,255,0.15);
+}
+
+.sidebar {
+    flex:1;
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(12px);
+    padding:18px;
+    border-radius:16px;
+    border:1px solid rgba(255,255,255,0.15);
+}
+
+h1 {
+    font-size:20px;
+    text-align:center;
+}
+
+label {
+    display:block;
+    margin-top:14px;
+    font-weight:bold;
+}
+
+input[type=range] {
+    width:85%;
+    accent-color:#00e676;
+    display:block;
+    margin-top:8px;
+}
+
+select {
+    width:100%;
+    padding:12px;
+    margin-top:6px;
+    border-radius:10px;
+}
+
+.result {
+    margin-top:20px;
+    background: rgba(0,0,0,0.25);
+    padding:15px;
+    border-radius:12px;
+    text-align:center;
+}
+
+.counter {
+    font-size:20px;
+    font-weight:bold;
+    margin:10px 0;
+}
+
+.small {
+    font-size:13px;
+    opacity:0.85;
+    margin-top:6px;
+}
+
+button {
+    width:100%;
+    margin-top:15px;
+    background:#00c853;
+    color:white;
+    border:none;
+    padding:14px;
+    border-radius:10px;
+    font-weight:bold;
+}
+
+@media(max-width:850px){
+    .wrapper{flex-direction:column;}
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="overlay">
+
+<div class="wrapper">
+
+<!-- КАЛЬКУЛЯТОР -->
+<div class="container">
+
+<h1>💰 Твой возможный доход курьера</h1>
+
+<label>Сколько часов в день?</label>
+<input id="hours" type="range" min="1" max="12" value="7">
+<div>Часов: <span id="hoursOut">7</span></div>
+
+<label>Сколько дней в неделю?</label>
+<input id="days" type="range" min="1" max="7" value="3">
+<div>Дней: <span id="daysOut">3</span></div>
+
+<label>Как будешь доставлять?</label>
+<select id="type">
+<option value="auto">🚗 Авто</option>
+<option value="bike">🚴 Вело</option>
+<option value="ped">🚶 Пеший</option>
+</select>
+
+<div class="result">
+
+<div>За день</div>
+<div class="counter" id="day">0 ₽</div>
+
+<div>За неделю</div>
+<div class="counter" id="week">0 ₽</div>
+
+<div>За месяц</div>
+<div class="counter" id="month">0 ₽</div>
+
+<div class="small" id="bonusText"></div>
+
+<button onclick="go()">🚀 Начать сейчас</button>
+
+</div>
+
+</div>
+
+<!-- БОНУС -->
+<div class="sidebar">
+
+<h2 style="font-size:16px;">🎁 Приведи друга</h2>
+
+<p style="font-size:13px; opacity:0.9;">
++20 000 ₽ за каждого приглашённого друга
+</p>
+
+<label>
+<input type="checkbox" id="refBonus">
+Хочу участвовать в бонусной программе
+</label>
+
+<label>Сколько друзей пригласишь?</label>
+<input id="friends" type="range" min="0" max="10" value="0">
+<div>Друзей: <span id="friendsOut">0</span></div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const link =
+"https://reg.eda.yandex.ru/?advertisement_campaign=forms_for_agents&user_invite_code=2ec40a49329f4a75ba7687a9e5ff3c0d&utm_content=blank";
+
+/* ставки */
+const rates = {
+    ped:  [330, 340],
+    bike: [410, 420],
+    auto: [510, 520]
+};
+
+let userRate = null;
+
+function rand(min, max){
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function initRates(){
+    userRate = {
+        ped: rand(rates.ped[0], rates.ped[1]),
+        bike: rand(rates.bike[0], rates.bike[1]),
+        auto: rand(rates.auto[0], rates.auto[1])
+    };
+}
+
+/* UI */
+const h = document.getElementById("hours");
+const d = document.getElementById("days");
+const t = document.getElementById("type");
+const f = document.getElementById("friends");
+const b = document.getElementById("refBonus");
+
+h.oninput = () => { document.getElementById("hoursOut").innerText = h.value; calc(); };
+d.oninput = () => { document.getElementById("daysOut").innerText = d.value; calc(); };
+f.oninput = () => { document.getElementById("friendsOut").innerText = f.value; calc(); };
+t.onchange = calc;
+b.onchange = calc;
+
+function animate(el, val){
+    let cur = 0;
+    clearInterval(el.i);
+
+    el.i = setInterval(()=>{
+        cur += val/25;
+
+        if(cur >= val){
+            cur = val;
+            clearInterval(el.i);
+        }
+
+        el.innerText = Math.round(cur).toLocaleString("ru-RU") + " ₽";
+    },15);
+}
+
+function calc(){
+
+    if(!userRate){
+        initRates();
+    }
+
+    let hours = +h.value;
+    let days = +d.value;
+    let type = t.value;
+
+    let hourly = userRate[type];
+
+    let day = hourly * hours;
+    let week = day * days;
+    let month = week * 4.3;
+
+    let bonus = 0;
+
+    if(b.checked){
+        bonus = (+f.value) * 20000;
+
+        document.getElementById("bonusText").innerText =
+            "🎁 Бонус за приглашённых друзей: " +
+            bonus.toLocaleString("ru-RU") + " ₽";
+    } else {
+        document.getElementById("bonusText").innerText = "";
+    }
+
+    animate(document.getElementById("day"), day);
+    animate(document.getElementById("week"), week);
+    animate(document.getElementById("month"), month);
+}
+
+function go(){
+    window.open(link, "_blank");
+}
+
+calc();
+
+</script>
+
+</body>
+</html>
