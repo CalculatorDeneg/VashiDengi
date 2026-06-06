@@ -59,6 +59,12 @@ input[type=range] {
     accent-color:#00e676;
 }
 
+.valueBox {
+    margin-top:6px;
+    font-size:14px;
+    opacity:0.9;
+}
+
 select {
     width:100%;
     padding:10px;
@@ -138,9 +144,11 @@ button {
 
 <label>Сколько часов в день ты хочешь работать?</label>
 <input id="hours" type="range" min="1" max="12" value="7">
+<div class="valueBox">Выбрано часов: <span id="hoursVal">7</span></div>
 
 <label>Сколько дней в неделю планируешь работать?</label>
 <input id="days" type="range" min="1" max="7" value="3">
+<div class="valueBox">Выбрано дней: <span id="daysVal">3</span></div>
 
 <label>На чём будешь доставлять заказы?</label>
 <select id="type">
@@ -181,12 +189,10 @@ button {
 <input id="friends" type="range" min="0" max="10" value="0">
 <div id="friendsOut">0</div>
 
-<!-- КНОПКА ЦЕЛИ -->
 <button class="goalBtn" onclick="toggleGoal()">
 🎯 На что хватит этих денег?
 </button>
 
-<!-- РАСКРЫВАЮЩИЙСЯ БЛОК -->
 <div id="goalBox" class="goalBox"></div>
 
 </div>
@@ -214,21 +220,21 @@ let userRate = {
     auto: rand(...rates.auto)
 };
 
-const goals = [
-{ name:"🎧 Наушники", price:5000 },
-{ name:"👕 Одежда", price:8000 },
-{ name:"📱 Смартфон", price:25000 },
-{ name:"🚲 Велосипед", price:35000 },
-{ name:"💻 Ноутбук", price:70000 },
-{ name:"🌊 В Питер на выходные", price:30000 },
-{ name:"🏖️ Отпуск", price:80000 }
-];
-
 const h = document.getElementById("hours");
 const d = document.getElementById("days");
 const t = document.getElementById("type");
 
-h.oninput = d.oninput = t.onchange = calc;
+h.oninput = () => {
+    document.getElementById("hoursVal").innerText = h.value;
+    calc();
+};
+
+d.oninput = () => {
+    document.getElementById("daysVal").innerText = d.value;
+    calc();
+};
+
+t.onchange = calc;
 
 function calc(){
 
@@ -271,6 +277,16 @@ renderGoal(window.currentMonth || 0);
 
 function renderGoal(month){
 
+let goals = [
+{ name:"🎧 Наушники", price:5000 },
+{ name:"👕 Одежда", price:8000 },
+{ name:"📱 Смартфон", price:25000 },
+{ name:"🚲 Велосипед", price:35000 },
+{ name:"💻 Ноутбук", price:70000 },
+{ name:"🌊 Байкал", price:60000 },
+{ name:"🏖️ Отпуск", price:80000 }
+];
+
 let filtered = goals.filter(g => g.price <= month * 3);
 
 if(filtered.length === 0){
@@ -278,7 +294,7 @@ document.getElementById("goalBox").innerHTML = "";
 return;
 }
 
-let goal = filtered[Math.floor(Math.random() * filtered.length)];
+let goal = filtered[Math.floor(Math.random()*filtered.length)];
 
 let save = month / 3;
 let time = goal.price / save;
