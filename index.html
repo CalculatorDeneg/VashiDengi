@@ -25,7 +25,7 @@ body::before {
 }
 
 .wrapper {
-    max-width:900px;
+    max-width:1000px;
     margin:20px auto;
     display:flex;
     gap:15px;
@@ -33,13 +33,29 @@ body::before {
     padding:15px;
 }
 
-.container, .sidebar {
-    flex:1;
-    min-width:300px;
+.container {
+    flex:2;
+    min-width:320px;
     background: rgba(255,255,255,0.10);
     backdrop-filter: blur(12px);
     border-radius:16px;
     padding:20px;
+    border:1px solid rgba(255,255,255,0.15);
+}
+
+.sidebar {
+    flex:1;
+    min-width:260px;
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
+
+.block {
+    background: rgba(255,255,255,0.10);
+    backdrop-filter: blur(12px);
+    border-radius:16px;
+    padding:18px;
     border:1px solid rgba(255,255,255,0.15);
 }
 
@@ -60,9 +76,9 @@ input[type=range] {
 }
 
 .valueBox {
-    margin-top:6px;
-    font-size:14px;
+    font-size:13px;
     opacity:0.9;
+    margin-top:5px;
 }
 
 select {
@@ -89,45 +105,34 @@ select {
 button {
     width:100%;
     margin-top:15px;
-    padding:14px;
+    padding:12px;
     border:none;
     border-radius:10px;
     background:#00c853;
     color:white;
     font-weight:bold;
+    font-size:16px;
     cursor:pointer;
+}
+
+/* цель */
+.goalBox {
+    display:none;
+    margin-top:10px;
+    padding:12px;
+    border-radius:12px;
+    background: rgba(0,0,0,0.35);
+}
+
+.goalTitle {
+    font-size:22px;
+    font-weight:bold;
+    margin-bottom:8px;
 }
 
 .small {
     font-size:13px;
     opacity:0.85;
-}
-
-/* цель */
-.goalBox {
-    margin-top:10px;
-    padding:12px;
-    border-radius:12px;
-    background: rgba(0,0,0,0.35);
-    display:none;
-}
-
-.goalTitle {
-    font-size:26px;
-    font-weight:bold;
-    margin-bottom:8px;
-}
-
-.goalBtn {
-    width:100%;
-    margin-top:15px;
-    padding:12px;
-    border-radius:10px;
-    border:none;
-    background:rgba(255,255,255,0.15);
-    color:white;
-    font-weight:bold;
-    cursor:pointer;
 }
 
 </style>
@@ -142,15 +147,15 @@ button {
 
 <h1>💰 Твой возможный доход курьером в Яндекс.Еде</h1>
 
-<label>Сколько часов в день ты хочешь работать?</label>
+<label>Сколько часов в день хочешь работать?</label>
 <input id="hours" type="range" min="1" max="12" value="7">
-<div class="valueBox">Выбрано часов: <span id="hoursVal">7</span></div>
+<div class="valueBox">Выбрано: <span id="hVal">7</span> часов</div>
 
 <label>Сколько дней в неделю планируешь работать?</label>
 <input id="days" type="range" min="1" max="7" value="3">
-<div class="valueBox">Выбрано дней: <span id="daysVal">3</span></div>
+<div class="valueBox">Выбрано: <span id="dVal">3</span> дней</div>
 
-<label>На чём будешь доставлять заказы?</label>
+<label>Как будешь доставлять?</label>
 <select id="type">
 <option value="auto">🚗 Авто</option>
 <option value="bike">🚴 Вело</option>
@@ -174,26 +179,35 @@ button {
 
 </div>
 
-<!-- БОНУС + ЦЕЛЬ -->
+<!-- ПРАВАЯ КОЛОНКА -->
 <div class="sidebar">
 
-<h2>🎁 Приведи друга</h2>
+<!-- ПРИВЕДИ ДРУГА -->
+<div class="block">
 
-<p class="small">+20 000 ₽ за каждого приглашённого друга</p>
-
-<label>
-<input type="checkbox" id="bonus"> Участвую в бонусе
-</label>
+<h3>🎁 Приведи друга</h3>
 
 <label>Сколько друзей пригласишь?</label>
 <input id="friends" type="range" min="0" max="10" value="0">
-<div id="friendsOut">0</div>
+<div class="valueBox">Выбрано: <span id="fVal">0</span> друзей</div>
 
-<button class="goalBtn" onclick="toggleGoal()">
+<div style="margin-top:10px;">
+<b>Доход за друзей:</b>
+<div id="bonus">0 ₽</div>
+</div>
+
+</div>
+
+<!-- ЦЕЛЬ (ПОД БЛОКОМ ДРУЗЕЙ) -->
+<div class="block">
+
+<button onclick="toggleGoal()">
 🎯 На что хватит этих денег?
 </button>
 
 <div id="goalBox" class="goalBox"></div>
+
+</div>
 
 </div>
 
@@ -214,7 +228,7 @@ function rand(min,max){
     return Math.floor(Math.random()*(max-min+1))+min;
 }
 
-let userRate = {
+let rate = {
     ped: rand(...rates.ped),
     bike: rand(...rates.bike),
     auto: rand(...rates.auto)
@@ -223,14 +237,22 @@ let userRate = {
 const h = document.getElementById("hours");
 const d = document.getElementById("days");
 const t = document.getElementById("type");
+const f = document.getElementById("friends");
+
+let monthIncome = 0;
 
 h.oninput = () => {
-    document.getElementById("hoursVal").innerText = h.value;
+    document.getElementById("hVal").innerText = h.value;
     calc();
 };
 
 d.oninput = () => {
-    document.getElementById("daysVal").innerText = d.value;
+    document.getElementById("dVal").innerText = d.value;
+    calc();
+};
+
+f.oninput = () => {
+    document.getElementById("fVal").innerText = f.value;
     calc();
 };
 
@@ -242,22 +264,22 @@ let hours = +h.value;
 let days = +d.value;
 let type = t.value;
 
-let hourly = userRate[type];
+let hourly = rate[type];
 
 let day = hourly * hours;
 let week = day * days;
 let month = week * 4.3;
 
-document.getElementById("day").innerText =
-Math.round(day).toLocaleString()+" ₽";
+monthIncome = month;
 
-document.getElementById("week").innerText =
-Math.round(week).toLocaleString()+" ₽";
+document.getElementById("day").innerText = Math.round(day).toLocaleString()+" ₽";
+document.getElementById("week").innerText = Math.round(week).toLocaleString()+" ₽";
+document.getElementById("month").innerText = Math.round(month).toLocaleString()+" ₽";
 
-document.getElementById("month").innerText =
-Math.round(month).toLocaleString()+" ₽";
-
-window.currentMonth = month;
+/* бонус */
+let friends = +f.value;
+document.getElementById("bonus").innerText =
+(friends * 20000).toLocaleString()+" ₽";
 
 }
 
@@ -272,11 +294,6 @@ return;
 
 box.style.display = "block";
 
-renderGoal(window.currentMonth || 0);
-}
-
-function renderGoal(month){
-
 let goals = [
 { name:"🎧 Наушники", price:5000 },
 { name:"👕 Одежда", price:8000 },
@@ -287,25 +304,17 @@ let goals = [
 { name:"🏖️ Отпуск", price:80000 }
 ];
 
-let filtered = goals.filter(g => g.price <= month * 3);
+let g = goals[Math.floor(Math.random()*goals.length)];
 
-if(filtered.length === 0){
-document.getElementById("goalBox").innerHTML = "";
-return;
-}
+let save = monthIncome / 3;
+let time = g.price / save;
 
-let goal = filtered[Math.floor(Math.random()*filtered.length)];
-
-let save = month / 3;
-let time = goal.price / save;
-
-document.getElementById("goalBox").innerHTML =
-
-`<div class="goalTitle">🎯 ${goal.name}</div>
+document.getElementById("goalBox").innerHTML = `
+<div class="goalTitle">🎯 ${g.name}</div>
 <div class="small">
-Стоимость: ${goal.price.toLocaleString()} ₽<br><br>
+Стоимость: ${g.price.toLocaleString()} ₽<br><br>
 Если откладывать 1/3 дохода:<br>
-≈ ${time.toFixed(1)} мес. до цели
+≈ ${time.toFixed(1)} месяцев
 </div>`;
 }
 
